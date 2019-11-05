@@ -7,6 +7,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.Stack;
 
 public class MainActivity extends AppCompatActivity {
@@ -14,8 +15,8 @@ public class MainActivity extends AppCompatActivity {
             mult, div, add, sub, exp, openPara, closePara, allClear, equal; //operators
     TextView numView;
     StringBuilder numbers = new StringBuilder(""); //number.append("") to add numbers
-    String multiplySTR = "*", divisionSTR = "/", addSTR = "+", subSTR = "-",
-            openParenthesisSTR = "(", closedParenthesisSTR = ")", expSTR = "^", ERROR = "--E--";
+    String multiplySTR = " * ", divisionSTR = " / ", addSTR = " + ", subSTR = " - ",
+            openParenthesisSTR = " ( ", closedParenthesisSTR = " ) ", expSTR = " ^ ", ERROR = "--E--";
     int numOfOpenPara = 0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 numbers.append("1");
                 numView.setText(numbers);
-               enableButtons();
+                enableButtons();
             }
 
         });
@@ -51,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 numbers.append("3");
                 numView.setText(numbers);
-               enableButtons();
+                enableButtons();
             }
         });
 
@@ -129,13 +130,13 @@ public class MainActivity extends AppCompatActivity {
 
         div.setOnClickListener(
                 new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                numbers.append(divisionSTR);
-                numView.setText(numbers);
-                disablebuttons();
-            }
-        });
+                    @Override
+                    public void onClick(View v) {
+                        numbers.append(divisionSTR);
+                        numView.setText(numbers);
+                        disablebuttons();
+                    }
+                });
 
         add.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -159,6 +160,9 @@ public class MainActivity extends AppCompatActivity {
         openPara.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if(numbers.length() > 0 && Character.isDigit(numbers.charAt(numbers.length()-1))){
+                    numbers.append(multiplySTR);
+                }
                 numbers.append(openParenthesisSTR);
                 numView.setText(numbers);
                 enableCloseParanths();
@@ -197,9 +201,14 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 try{
-                    postFix();
+                    double answer = equal(convertToPostFix());
+                    numbers.delete(0,numbers.length());
+                    numbers.append(answer);
                     numView.setText(numbers);
-                }catch (Exception e){
+                }catch (StackOverflowError e){
+                    numbers.delete(0,numbers.length());
+                    numView.setText("Infinity");
+                } catch (Exception e){
                     numbers.delete(0,numbers.length());
                     numView.setText(ERROR);
                 }
@@ -207,52 +216,125 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    public void postFix(){
-        String result = "";
+    public ArrayList<String> convertToPostFix(){
+
+        ArrayList<String> postArray = new ArrayList<>();
+        String[] numsAndOps = numbers.toString().split(" "); //full numbers and operators
         Stack<String> stack = new Stack<>();
-        for (int i = 0; i <numbers.length() ; i++) {
 
-            String indexDigit = Character.toString(numbers.charAt(i));
+        for (int i = 0; i < numsAndOps.length ; i++) {
 
+            String indexDigit = numsAndOps[i];
             if(checkOperatorPriority(indexDigit)>0){
-                while(stack.isEmpty()==false && checkOperatorPriority(stack.peek())>=checkOperatorPriority(indexDigit)){
-                    result += stack.pop();
+                while(!stack.isEmpty() && checkOperatorPriority(stack.peek()) >= checkOperatorPriority(indexDigit)){
+                    //result += stack.pop();
+                    postArray.add(stack.pop());
+
                 }
                 stack.push(indexDigit);
-            }else if(indexDigit.equals(closedParenthesisSTR)){
-                String numForUse = stack.pop();
-                while(!numForUse.equals(openParenthesisSTR)){
-                    result += numForUse;
+            }else if(indexDigit.equals(")")){
+                String numForUse = stack.pop(); //removes closing parenthesis and ignores it in postStack
+                while(!numForUse.equals("(")){
+
+                    postArray.add(numForUse);
+
                     numForUse = stack.pop();
                 }
-            }else if(indexDigit.equals(openParenthesisSTR)){
+            }else if(indexDigit.equals("(")){
                 stack.push(indexDigit);
-            }else{
-
-                result += indexDigit;
+            }
+            else if(isNumber(indexDigit)){
+                postArray.add(indexDigit);
             }
         }
-        for (int i = 0; i <=stack.size() ; i++) {
-            result += stack.pop();
+        if(stack.size() > 0){
+            for (int i = 0; i <=stack.size() ; i++) {
+
+                postArray.add(stack.pop());
+
+            }
         }
-        numbers.delete(0,numbers.length());
-        numbers.append(result);
+
+
+        return postArray;
     }
 
-    public void operations(){
+    public double equal(ArrayList<String> postArray){
+        if(postArray.size() == 1){
+            return Double.parseDouble(postArray.get(0));
+        }
         //uses numbers postfix to do math!
-        //use 301 code for rest
+        double answer = 0;
+        double temp;
+        Stack<Double> doubleStack = new Stack<>();
+        for(int i = 0; i < postArray.size(); i++){
+            if(isNumber(postArray.get(i))){
+                doubleStack.push(Double.parseDouble(postArray.get(i)));
+            }else if(postArray.get(i).equals("*") || postArray.get(i).equals("/")
+                    || postArray.get(i).equals("+") || postArray.get(i).equals("-")
+                    || postArray.get(i).equals("^")){
+                double y = doubleStack.pop(), x = doubleStack.pop();
+                temp = arithmetic(postArray.get(i), x, y);
+                //answer = temp;
+                doubleStack.push(temp);
+            }
+        }
+
+        // return answer;
+        return doubleStack.pop();
     }
+
+    public double arithmetic(String operator, double x, double y) {
+        if (operator.equals("*")) {
+            return x * y;
+        } else if (operator.equals("/")) {
+            if(y == 0){
+                throw new ArithmeticException();
+            }
+            return x / y;
+        } else if (operator.equals("+")) {
+            return x + y;
+        }else if (operator.equals("^")){
+            return power(x,y);
+        } else{
+            return x - y;
+        }
+    }
+
+    public double power(double base, double exp){
+        if(exp > 9999){
+            throw new StackOverflowError();
+        }
+        double exponentialNumber = 1;
+        for(int i = 0; i < exp; i++){
+            exponentialNumber *= base;
+        }
+        return exponentialNumber;
+
+
+    }
+
+    public boolean isNumber(String indexNumber){
+        try{
+            double tester = Double.parseDouble(indexNumber);
+            return true;
+        }catch (Exception e){
+            return false;
+        }
+    }
+
 
     public int checkOperatorPriority(String operator){
-        if(operator.equals(addSTR) || operator.equals(subSTR)){
+        if(operator.equals("+") ||
+                operator.equals("-")){
             return 1;
-        } else if(operator.equals(multiplySTR) || operator.equals(divisionSTR)){
+        } else if(operator.equals("*") ||
+                operator.equals("/")){
             return 2;
-        }else if (operator.equals(expSTR)){
+        }else if (operator.equals("^")){
             return 3;
         }
-        return -1;
+        return -1; //if it's a number
     }
 
     public void setGUI() {
