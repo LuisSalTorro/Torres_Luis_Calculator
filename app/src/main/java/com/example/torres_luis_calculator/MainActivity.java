@@ -12,7 +12,7 @@ import java.util.Stack;
 
 public class MainActivity extends AppCompatActivity {
     Button button, button2, button3, button4, button5, button6, button7, button8, button9, button10, //numbers
-            mult, div, add, sub, exp, openPara, closePara, allClear, equal; //operators
+            mult, div, add, sub, exp, openPara, closePara, allClear, equal, negPos, decimal; //operators
     TextView numView;
     StringBuilder numbers = new StringBuilder(""); //number.append("") to add numbers
     String multiplySTR = " * ", divisionSTR = " / ", addSTR = " + ", subSTR = " - ",
@@ -163,6 +163,7 @@ public class MainActivity extends AppCompatActivity {
                 if(numbers.length() > 0 && Character.isDigit(numbers.charAt(numbers.length()-1))){
                     numbers.append(multiplySTR);
                 }
+                negPos.setEnabled(true);
                 numbers.append(openParenthesisSTR);
                 numView.setText(numbers);
                 enableCloseParanths();
@@ -195,6 +196,25 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 numbers.delete(0,numbers.length());
                 numView.setText("");
+                disablebuttons();
+            }
+        });
+        negPos.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                numbers.append("-");
+                numView.setText(numbers);
+                disablebuttons();
+                negPos.setEnabled(false);
+            }
+        });
+        decimal.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                numbers.append(".");
+                numView.setText(numbers);
+                disablebuttons();
+                negPos.setEnabled(false);
             }
         });
         equal.setOnClickListener(new View.OnClickListener() {
@@ -212,6 +232,7 @@ public class MainActivity extends AppCompatActivity {
                     numbers.delete(0,numbers.length());
                     numView.setText(ERROR);
                 }
+
             }
         });
     }
@@ -254,7 +275,6 @@ public class MainActivity extends AppCompatActivity {
 
             }
         }
-
 
         return postArray;
     }
@@ -302,15 +322,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public double power(double base, double exp){
-        if(exp > 9999){
-            throw new StackOverflowError();
-        }
-        double exponentialNumber = 1;
-        for(int i = 0; i < exp; i++){
-            exponentialNumber *= base;
-        }
-        return exponentialNumber;
-
+//        if(exp > 9999){
+//            throw new StackOverflowError();
+//        }
+//        double exponentialNumber = 1;
+//        for(int i = 0; i < exp; i++){
+//            exponentialNumber *= base;
+//        }
+//        return exponentialNumber;
+        return Math.pow(base, exp);
 
     }
 
@@ -357,6 +377,8 @@ public class MainActivity extends AppCompatActivity {
         closePara = findViewById(R.id.closePara);
         allClear = findViewById(R.id.allClear);
         equal = findViewById(R.id.equal);
+        negPos = findViewById(R.id.negPos);
+        decimal = findViewById(R.id.decimal);
 
         numView = findViewById(R.id.numView);
         disablebuttons();
@@ -377,6 +399,8 @@ public class MainActivity extends AppCompatActivity {
         sub.setEnabled(false);
         exp.setEnabled(false);
         equal.setEnabled(false);
+        decimal.setEnabled(false);
+        negPos.setEnabled(true);
     }
 
     public void enableButtons() {
@@ -386,6 +410,8 @@ public class MainActivity extends AppCompatActivity {
         sub.setEnabled(true);
         exp.setEnabled(true);
         equal.setEnabled(true);
+        decimal.setEnabled(true);
+        negPos.setEnabled(false);
     }
 
 
