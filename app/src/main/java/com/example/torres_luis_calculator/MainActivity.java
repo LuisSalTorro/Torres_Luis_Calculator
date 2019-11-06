@@ -31,8 +31,10 @@ public class MainActivity extends AppCompatActivity {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                checkClosePara();
                 numbers.append("1");
                 numView.setText(numbers);
+                checkClosePara();
                 enableButtons();
             }
 
@@ -41,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
         button2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                checkClosePara();
                 numbers.append("2");
                 numView.setText(numbers);
                 enableButtons();
@@ -50,6 +53,7 @@ public class MainActivity extends AppCompatActivity {
         button3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                checkClosePara();
                 numbers.append("3");
                 numView.setText(numbers);
                 enableButtons();
@@ -59,6 +63,7 @@ public class MainActivity extends AppCompatActivity {
         button4.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                checkClosePara();
                 numbers.append("4");
                 numView.setText(numbers);
                 enableButtons();
@@ -68,6 +73,7 @@ public class MainActivity extends AppCompatActivity {
         button5.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                checkClosePara();
                 numbers.append("5");
                 numView.setText(numbers);
                 enableButtons();
@@ -77,6 +83,7 @@ public class MainActivity extends AppCompatActivity {
         button6.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                checkClosePara();
                 numbers.append("6");
                 numView.setText(numbers);
                 enableButtons();
@@ -86,6 +93,7 @@ public class MainActivity extends AppCompatActivity {
         button7.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                checkClosePara();
                 numbers.append("7");
                 numView.setText(numbers);
                 enableButtons();
@@ -95,6 +103,7 @@ public class MainActivity extends AppCompatActivity {
         button8.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                checkClosePara();
                 numbers.append("8");
                 numView.setText(numbers);
                 enableButtons();
@@ -104,6 +113,7 @@ public class MainActivity extends AppCompatActivity {
         button9.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                checkClosePara();
                 numbers.append("9");
                 numView.setText(numbers);
                 enableButtons();
@@ -113,6 +123,7 @@ public class MainActivity extends AppCompatActivity {
         button10.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                checkClosePara();
                 numbers.append("0");
                 numView.setText(numbers);
                 enableButtons();
@@ -125,6 +136,7 @@ public class MainActivity extends AppCompatActivity {
                 numbers.append(multiplySTR);
                 numView.setText(numbers);
                 disablebuttons();
+                closePara.setEnabled(false);
             }
         });
 
@@ -135,6 +147,7 @@ public class MainActivity extends AppCompatActivity {
                         numbers.append(divisionSTR);
                         numView.setText(numbers);
                         disablebuttons();
+                        closePara.setEnabled(false);
                     }
                 });
 
@@ -144,6 +157,7 @@ public class MainActivity extends AppCompatActivity {
                 numbers.append(addSTR);
                 numView.setText(numbers);
                 disablebuttons();
+                closePara.setEnabled(false);
             }
         });
 
@@ -154,6 +168,7 @@ public class MainActivity extends AppCompatActivity {
                 numbers.append(subSTR);
                 numView.setText(numbers);
                 disablebuttons();
+                closePara.setEnabled(false);
             }
         });
 
@@ -196,7 +211,9 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 numbers.delete(0,numbers.length());
                 numView.setText("");
+                numOfOpenPara = 0;
                 disablebuttons();
+                disableCloseParanths();
             }
         });
         negPos.setOnClickListener(new View.OnClickListener() {
@@ -232,6 +249,8 @@ public class MainActivity extends AppCompatActivity {
                     numbers.delete(0,numbers.length());
                     numView.setText(ERROR);
                 }
+                disablebuttons();
+                disableCloseParanths();
 
             }
         });
@@ -297,10 +316,9 @@ public class MainActivity extends AppCompatActivity {
                 temp = arithmetic(postArray.get(i), x, y);
                 //answer = temp;
                 doubleStack.push(temp);
-            }
+            } //sometimes empty spaces make it here, so it's best to let them run through the loop
         }
 
-        // return answer;
         return doubleStack.pop();
     }
 
@@ -322,14 +340,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public double power(double base, double exp){
-//        if(exp > 9999){
-//            throw new StackOverflowError();
-//        }
-//        double exponentialNumber = 1;
-//        for(int i = 0; i < exp; i++){
-//            exponentialNumber *= base;
-//        }
-//        return exponentialNumber;
+
         return Math.pow(base, exp);
 
     }
@@ -355,6 +366,25 @@ public class MainActivity extends AppCompatActivity {
             return 3;
         }
         return -1; //if it's a number
+    }
+
+    public void checkClosePara(){
+        //when entering a number, we check to see if the previous spot is a closing parantheses.
+        try{
+            if(numbers.length() > 2){
+                String charactercheck = Character.toString(numbers.charAt(numbers.length()-2));
+                if(charactercheck.equals(")")){
+                    numbers.append(multiplySTR);
+                }else{
+                    return;
+                }
+            }else{
+                return;
+            }
+        }catch (Exception e){
+
+        }
+
     }
 
     public void setGUI() {
@@ -412,6 +442,9 @@ public class MainActivity extends AppCompatActivity {
         equal.setEnabled(true);
         decimal.setEnabled(true);
         negPos.setEnabled(false);
+        if(numOfOpenPara > 0){
+            closePara.setEnabled(true);
+        }
     }
 
 
